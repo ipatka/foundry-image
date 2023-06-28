@@ -842,7 +842,8 @@ impl Backend {
             // update block metadata
             storage.best_number = block_number;
             storage.best_hash = block_hash;
-            storage.total_difficulty = storage.total_difficulty.saturating_add(header.difficulty);
+            // storage.total_difficulty = storage.total_difficulty.saturating_add(header.difficulty);
+            storage.total_difficulty = storage.total_difficulty.saturating_add(U256::from(1));
 
             storage.blocks.insert(block_hash, block);
             storage.hashes.insert(block_number, block_hash);
