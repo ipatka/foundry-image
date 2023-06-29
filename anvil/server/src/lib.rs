@@ -10,7 +10,7 @@ use anvil_rpc::{
 use axum::{
     extract::Extension,
     http::{header, HeaderValue, Method},
-    routing::{post, IntoMakeService},
+    routing::{post, get, IntoMakeService},
     Router, Server,
 };
 use hyper::server::conn::AddrIncoming;
@@ -35,6 +35,10 @@ pub use config::ServerConfig;
 /// Type alias for the configured axum server
 pub type AnvilServer = Server<AddrIncoming, IntoMakeService<Router>>;
 
+async fn health() -> &'static str {
+    "I am alive"
+}
+
 /// Configures an [axum::Server] that handles RPC-Calls, both HTTP requests and requests via
 /// websocket
 pub fn serve_http_ws<Http, Ws>(
@@ -50,7 +54,9 @@ where
     let ServerConfig { allow_origin, no_cors } = config;
 
     let svc = Router::new()
-        .route("/", post(handler::handle::<Http>).get(ws::handle_ws::<Ws>))
+        .route("/", post(handler::handle::<Http>)
+        .get(ws::handle_ws::<Ws>))
+        .route("/health", get(health))
         .layer(Extension(http))
         .layer(Extension(ws))
         .layer(TraceLayer::new_for_http());
